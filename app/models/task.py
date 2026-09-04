@@ -11,3 +11,4 @@ class Task(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(nullable=True)
     priority: Mapped[int] = mapped_column(default=1, nullable=False)
+    due_date: Mapped[str | None] = mapped_column(nullable=True)
