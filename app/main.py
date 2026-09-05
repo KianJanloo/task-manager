@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import tasks
+from app.routers import tasks, auth
 
 app = FastAPI(
     title="Task Manager API",
@@ -10,4 +10,6 @@ app = FastAPI(
 def health_check():
     return {"status": "ok"}
 
+app.include_router(auth.router)
 app.include_router(tasks.router)
+

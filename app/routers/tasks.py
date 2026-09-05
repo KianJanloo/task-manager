@@ -11,6 +11,8 @@ from app.services.task_service import (
     get_tasks,
 )
 
+from app.security import get_current_user
+
 router = APIRouter(
     prefix="/tasks",
     tags=["Tasks"],
@@ -20,6 +22,7 @@ router = APIRouter(
 @router.get("/", response_model=list[TaskResponse])
 def get_tasks_endpoint(
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     return get_tasks(db)
 
