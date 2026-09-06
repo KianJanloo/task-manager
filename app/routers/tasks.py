@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.db.database import get_db
 from app.schemas.task import CreateTask, UpdateTask, TaskResponse
 from app.services.task_service import (
     get_task_by_id,
@@ -11,7 +11,7 @@ from app.services.task_service import (
     get_tasks,
 )
 
-from app.security import get_current_user
+from app.core.exceptions import NotFoundException, AlreadyExistsException, UnauthorizedException
 
 router = APIRouter(
     prefix="/tasks",
@@ -22,7 +22,6 @@ router = APIRouter(
 @router.get("/", response_model=list[TaskResponse])
 def get_tasks_endpoint(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
 ):
     return get_tasks(db)
 
@@ -35,10 +34,7 @@ def get_task_endpoint(
     task = get_task_by_id(db, task_id)
 
     if task is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found",
-        )
+        raise NotFoundException("Task", task_id)
 
     return task
 
@@ -60,10 +56,7 @@ def update_task_endpoint(
     task = update_task(db, task_id, data)
 
     if task is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found",
-        )
+        raise NotFoundException("Task", task_id)
 
     return task
 
@@ -76,9 +69,6 @@ def delete_task_endpoint(
     deleted = delete_task(db, task_id)
 
     if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found",
-        )
+        raise NotFoundException("Task", task_id)
 
     return {"message": "Task deleted"}

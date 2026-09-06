@@ -9,7 +9,7 @@ from pwdlib import PasswordHash
 from fastapi.security import HTTPBearer
 from fastapi import Depends, HTTPException
 
-from app.database import get_db
+from app.db.database import get_db
 from sqlalchemy.orm import Session
 
 from app.models.user import User
