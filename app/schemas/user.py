@@ -1,18 +1,18 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 
 class UserRegister(BaseModel):
-    email: str
+    email: EmailStr
     password: str = Field(min_length=8)
 
 
 class UserResponse(BaseModel):
     id: int
-    email: str
+    email: EmailStr
 
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
