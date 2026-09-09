@@ -1,4 +1,4 @@
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String
 
 from pydantic import EmailStr
@@ -15,4 +15,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
+    )
+    
+    codes: Mapped[list["Code"]] = relationship(
+        back_populates="user"
     )

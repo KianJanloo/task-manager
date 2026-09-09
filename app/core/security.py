@@ -16,6 +16,8 @@ from app.models.user import User
 
 from datetime import datetime, timedelta, timezone
 
+import secrets
+
 load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -127,3 +129,6 @@ def decode_refresh_token(token: str) -> dict:
             status_code=401,
             detail="Invalid refresh token"
         )
+
+def generate_code():
+    return f"{secrets.randbelow(1_000_000):06d}"

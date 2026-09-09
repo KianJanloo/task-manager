@@ -6,9 +6,7 @@ from app.schemas.task import CreateTask, UpdateTask
 
 
 def get_tasks(db: Session):
-    return db.execute(
-        select(Task)
-    ).scalars().all()
+    return db.execute(select(Task)).scalars().all()
 
 
 def get_task_by_id(db: Session, task_id: int):

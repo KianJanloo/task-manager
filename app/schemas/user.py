@@ -19,3 +19,14 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class UserForgetPass(BaseModel):
+    email: EmailStr
+    
+
+class UserResetPass(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6)
+    new_password: str = Field(min_length=8)
+    
