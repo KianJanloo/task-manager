@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 
 from app.db.database import Base
@@ -12,3 +12,9 @@ class Task(Base):
     description: Mapped[str | None] = mapped_column(nullable=True)
     priority: Mapped[int] = mapped_column(default=1, nullable=False)
     due_date: Mapped[str | None] = mapped_column(nullable=True)
+
+    notes: Mapped[list["Note"]] = relationship(
+        "Note",
+        secondary="note_task",
+        back_populates="tasks",
+    )
