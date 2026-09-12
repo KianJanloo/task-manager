@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 
 class CreateTask(BaseModel):
@@ -8,7 +9,7 @@ class CreateTask(BaseModel):
 
 
 class TaskResponse(BaseModel):
-    id: int
+    id: UUID
     title: str
     description: str | None = None
     priority: int = Field(default=1, ge=1, le=5)

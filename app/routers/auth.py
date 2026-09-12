@@ -18,6 +18,7 @@ from app.services.auth_service import (
     forget_pass_service,
     reset_pass_service,
 )
+from app.core.security import get_current_user
 
 router = APIRouter(
     prefix="/auth",
@@ -35,7 +36,11 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
     return login_service(data, db)
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post(
+    "/refresh", response_model=TokenResponse, dependencies=[
+        Depends(get_current_user)
+    ]
+)
 def refresh(refresh_token: str = Body(..., embed=True), db: Session = Depends(get_db)):
     return refresh_service(refresh_token, db)
 

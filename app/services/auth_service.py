@@ -22,6 +22,8 @@ from app.models.code import Code
 
 from app.core.exceptions import AlreadyExistsException, UnauthorizedException
 
+from uuid import UUID
+
 
 def register_service(data: UserRegister, db: Session):
     existing_user = get_user_by_email(db, data.email)
@@ -58,7 +60,7 @@ def login_service(data: UserLogin, db: Session):
 def refresh_service(refresh_token: str, db: Session):
     payload = decode_refresh_token(refresh_token)
 
-    user_id = int(payload["sub"])
+    user_id = UUID(payload["sub"])
 
     user = db.get(User, user_id)
 

@@ -18,6 +18,8 @@ from datetime import datetime, timedelta, timezone
 
 import secrets
 
+from uuid import UUID
+
 load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -36,7 +38,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return password_hash.verify(password, hashed_password)
 
 
-def create_access_token(user_id: int) -> str:
+def create_access_token(user_id: UUID) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=15)
 
     payload = {
@@ -52,7 +54,7 @@ def create_access_token(user_id: int) -> str:
     )
 
 
-def create_refresh_token(user_id: int) -> str:
+def create_refresh_token(user_id: UUID) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=7)
 
     payload = {
@@ -70,11 +72,7 @@ def create_refresh_token(user_id: int) -> str:
 
 def decode_access_token(token: str) -> dict:
     try:
-        return jwt.decode(
-            token,
-            JWT_SECRET,
-            algorithms=[JWT_ALGORITHM]
-        )
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     except InvalidTokenError:
         raise HTTPException(
             status_code=401,
@@ -82,10 +80,7 @@ def decode_access_token(token: str) -> dict:
         )
 
 
-def get_current_user(
-    credentials=Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-):
+def get_current_user(credentials=Depends(oauth2_scheme), db: Session = Depends(get_db)):
     token = credentials.credentials
     payload = decode_access_token(token)
 
@@ -95,7 +90,7 @@ def get_current_user(
             detail="Invalid token type",
         )
 
-    user_id = int(payload.get("sub"))
+    user_id = UUID(payload.get("sub"))
 
     user = db.get(User, user_id)
 
@@ -108,27 +103,30 @@ def get_current_user(
     return user
 
 
+def require_role(*allowed_roles: str):
+    def role_checker(user: User = Depends(get_current_user)):
+        if user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to access this resource",
+            )
+        return user
+
+    return role_checker
+
+
 def decode_refresh_token(token: str) -> dict:
     try:
-        payload = jwt.decode(
-            token,
-            JWT_SECRET,
-            algorithms=JWT_ALGORITHM
-        )
+        payload = jwt.decode(token, JWT_SECRET, algorithms=JWT_ALGORITHM)
 
         if payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid refresh token"
-            )
-            
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+
         return payload
 
     except InvalidTokenError:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid refresh token"
-        )
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
 
 def generate_code():
     return f"{secrets.randbelow(1_000_000):06d}"

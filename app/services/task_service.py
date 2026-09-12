@@ -4,12 +4,14 @@ from sqlalchemy import select
 from app.models.task import Task
 from app.schemas.task import CreateTask, UpdateTask
 
+from uuid import UUID
+
 
 def get_tasks(db: Session):
     return db.execute(select(Task)).scalars().all()
 
 
-def get_task_by_id(db: Session, task_id: int):
+def get_task_by_id(db: Session, task_id: UUID):
     return db.get(Task, task_id)
 
 
@@ -23,7 +25,7 @@ def create_task(db: Session, data: CreateTask):
     return task
 
 
-def update_task(db: Session, task_id: int, data: UpdateTask):
+def update_task(db: Session, task_id: UUID, data: UpdateTask):
     task = db.get(Task, task_id)
 
     if task is None:
@@ -40,7 +42,7 @@ def update_task(db: Session, task_id: int, data: UpdateTask):
     return task
 
 
-def delete_task(db: Session, task_id: int):
+def delete_task(db: Session, task_id: UUID):
     task = db.get(Task, task_id)
 
     if task is None:

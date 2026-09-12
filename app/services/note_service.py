@@ -7,6 +7,7 @@ from app.schemas.note import CreateNote, UpdateNote
 from app.models.task import Task
 
 from datetime import datetime, timezone
+from uuid import UUID
 
 
 def get_notes_service(db: Session, page: int = 1, limit: int = 100):
@@ -15,7 +16,7 @@ def get_notes_service(db: Session, page: int = 1, limit: int = 100):
     return db.execute(select(Note).offset(skip).limit(limit)).scalars().all()
 
 
-def get_note_service(db: Session, note_id: int):
+def get_note_service(db: Session, note_id: UUID):
     note = db.execute(select(Note).where(Note.id == note_id)).scalar_one_or_none()
 
     if note is None:
@@ -34,7 +35,7 @@ def create_note_service(db: Session, data: CreateNote):
     return note
 
 
-def assign_note_to_task_service(db: Session, note_id: int, task_id: int):
+def assign_note_to_task_service(db: Session, note_id: UUID, task_id: UUID):
     note = get_note_service(db, note_id)
     task = db.execute(select(Task).where(Task.id == task_id)).scalar_one_or_none()
 
@@ -48,7 +49,7 @@ def assign_note_to_task_service(db: Session, note_id: int, task_id: int):
     return note
 
 
-def update_note_service(db: Session, note_id: int, data: UpdateNote):
+def update_note_service(db: Session, note_id: UUID, data: UpdateNote):
     note = get_note_service(db, note_id)
 
     note.updated_at = datetime.now(timezone.utc)
@@ -61,7 +62,7 @@ def update_note_service(db: Session, note_id: int, data: UpdateNote):
     return note
 
 
-def delete_note_service(db: Session, note_id: int):
+def delete_note_service(db: Session, note_id: UUID):
     note = get_note_service(db, note_id)
 
     db.delete(note)

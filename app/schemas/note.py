@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 
 class CreateNote(BaseModel):
@@ -9,7 +10,7 @@ class CreateNote(BaseModel):
 
 
 class NoteResponse(BaseModel):
-    id: int
+    id: UUID
     title: str
     description: str | None = None
     created_at: datetime

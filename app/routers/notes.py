@@ -10,6 +10,9 @@ from app.services.note_service import (
 )
 from sqlalchemy.orm import Session
 from app.schemas.note import CreateNote, UpdateNote
+from app.core.security import get_current_user, require_role
+
+from uuid import UUID
 
 router = APIRouter(
     prefix="/notes",
@@ -18,36 +21,62 @@ router = APIRouter(
 
 
 @router.get("/")
-async def get_notes(db: Session = Depends(get_db), page: int = 1, limit: int = 100):
+def get_notes(db: Session = Depends(get_db), page: int = 1, limit: int = 100):
     notes = get_notes_service(db, page, limit)
     return notes
 
 
 @router.get("/{note_id}")
-async def get_note(note_id: int, db: Session = Depends(get_db)):
+def get_note(note_id: UUID, db: Session = Depends(get_db)):
     note = get_note_service(db, note_id)
     return note
 
 
-@router.post("/")
-async def create_note(data: CreateNote, db: Session = Depends(get_db)):
+@router.post(
+    "/",
+    dependencies=[
+        Depends(get_current_user),
+        Depends(require_role("admin")),
+    ],
+)
+def create_note(data: CreateNote, db: Session = Depends(get_db)):
     note = create_note_service(db, data)
     return note
 
 
-@router.post("/{note_id}/assign/{task_id}")
-async def assign_note_to_task(note_id: int, task_id: int, db: Session = Depends(get_db)):
+@router.post(
+    "/{note_id}/assign/{task_id}",
+    dependencies=[
+        Depends(get_current_user),
+        Depends(require_role("admin")),
+    ],
+)
+def assign_note_to_task(
+    note_id: UUID, task_id: UUID, db: Session = Depends(get_db)
+):
     note = assign_note_to_task_service(db, note_id, task_id)
     return note
 
 
-@router.put("/{note_id}")
-async def update_note(note_id: int, data: UpdateNote, db: Session = Depends(get_db)):
+@router.put(
+    "/{note_id}",
+    dependencies=[
+        Depends(get_current_user),
+        Depends(require_role("admin")),
+    ],
+)
+def update_note(note_id: UUID, data: UpdateNote, db: Session = Depends(get_db)):
     note = update_note_service(db, note_id, data)
     return note
 
 
-@router.delete("/{note_id}")
-async def delete_note(note_id: int, db: Session = Depends(get_db)):
+@router.delete(
+    "/{note_id}",
+    dependencies=[
+        Depends(get_current_user),
+        Depends(require_role("admin")),
+    ],
+)
+def delete_note(note_id: UUID, db: Session = Depends(get_db)):
     result = delete_note_service(db, note_id)
     return result
